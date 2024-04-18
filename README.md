@@ -18,6 +18,10 @@ Este proyecto desarrolla un sistema de recomendación de películas que utiliza 
 
 ## Instalación
 Para ejecutar este proyecto, clona el repositorio y asegúrate de tener instaladas las siguientes dependencias:
+```bash
+git clone https://github.com/albertvila78/Proyecto-final
+cd Proyecto-final
+pip install pandas numpy matplotlib seaborn scikit-learn
 
 ## Contribuir
 Las contribuciones son bienvenidas. Si deseas contribuir, por favor haz un fork del repositorio y crea un Pull Request con tus mejoras.
