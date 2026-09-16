@@ -1,0 +1,8 @@
+# Entorno objetivo: Python 3.11. NumPy 1.x para compatibilidad con Surprise.
+numpy>=1.24,<2
+pandas>=2.1,<3
+scikit-learn>=1.3,<2
+matplotlib>=3.7,<4
+seaborn>=0.13,<0.14
+scikit-surprise==1.1.4
+jupyterlab>=4,<5
