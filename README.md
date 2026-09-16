@@ -1,39 +1,72 @@
-# Sistema de Recomendación de Películas
+# Sistema de recomendación de películas
 
-## Descripción
-Este proyecto desarrolla un sistema de recomendación de películas que utiliza técnicas de aprendizaje automático y filtrado colaborativo para proporcionar recomendaciones personalizadas a los usuarios. Basado en los datos de películas y calificaciones de usuarios de Kaggle, este sistema intenta mejorar la experiencia del usuario en plataformas de streaming, aumentando la retención y satisfacción del usuario.
-
-## Características
-- **Preprocesamiento de Datos**: Limpieza y transformación de conjuntos de datos para eliminar duplicados y manejar valores nulos.
-- **Exploración de Datos**: Análisis de las características de las películas y calificaciones para entender mejor la distribución y las tendencias.
-- **Filtrado Colaborativo**: Implementación del algoritmo SVD para predecir cómo los usuarios podrían calificar películas que no han visto aún.
-- **Modelo de Recomendación basado en Contenido**: Uso de TfidfVectorizer para convertir texto a vectores y calcular similitudes usando linear_kernel.
-
-## Tecnologías Utilizadas
-- Python
-- Pandas, Numpy
-- Scikit-learn
-- Matplotlib, Seaborn
-- SVD
+Proyecto de aprendizaje que combina un ranking por votos, recomendaciones por contenido (TF-IDF) y un modelo colaborativo SVD. El filtro híbrido selecciona películas similares y las ordena según la nota estimada para un usuario conocido.
 
 ## Instalación
-Para ejecutar este proyecto, clona el repositorio y asegúrate de tener instaladas las siguientes dependencias:
+
+Se recomienda Python 3.11. Desde la carpeta del repositorio:
+
 ```bash
-git clone https://github.com/albertvila78/Proyecto-final
-cd Proyecto-final
-pip install pandas numpy matplotlib seaborn scikit-learn
+python -m venv .venv
 ```
 
-## Contribuir
-Las contribuciones son bienvenidas. Si deseas contribuir, por favor haz un fork del repositorio y crea un Pull Request con tus mejoras.
+Activa el entorno en Windows PowerShell con `.venv\Scripts\Activate.ps1`; en macOS/Linux con `source .venv/bin/activate`. Después:
 
-## Licencia
-Este proyecto está bajo la Licencia MIT - vea el archivo LICENSE para más detalles.
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
-## Autores
-- **Albert Vila** - *Trabajo Inicial* - [AlbertVila](https://github.com/albertvila78)
+`scikit-surprise` puede requerir herramientas de compilación de C/C++ según la plataforma. Se limita NumPy a 1.x para esta versión de Surprise. Los rangos de dependencias no son un lockfile; el entrenamiento completo debe verificarse en el entorno de destino.
 
-## Referencias
-- [The Movies Dataset en Kaggle](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)
-- [Aprendiendo Machine Learning](https://www.aprendemachinelearning.com/sistemas-de-recomendacion/)
+## Datos necesarios
 
+Descarga y descomprime [The Movies Dataset de Kaggle](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset). Puede requerir iniciar sesión en Kaggle. Crea una carpeta `data` junto al cuaderno y coloca estos archivos con sus nombres originales:
+
+- `data/movies_metadata.csv`
+- `data/credits.csv`
+- `data/ratings_small.csv`
+- `data/links.csv`
+
+No sustituyas `ratings_small.csv` por `ratings.csv`: el conjunto grande incrementaría considerablemente el coste de entrenamiento. Los datos no se distribuyen en este repositorio; consulta sus condiciones de uso en la fuente.
+
+## Ejecución
+
+Desde la raíz del proyecto:
+
+```bash
+python -m jupyterlab
+```
+
+Abre `Sistema de recomendación de películas.ipynb` y ejecuta **Restart Kernel and Run All Cells**. La búsqueda de parámetros realiza 324 combinaciones con tres particiones cada una, por lo que puede tardar. Las salidas antiguas se han eliminado para no presentarlas como resultados de esta versión.
+
+El cuaderno permite:
+
+- `get_genre_recommendations('Horror')`: ranking por género.
+- `get_recommendations('The Ring')`: similitud de contenido.
+- `improved_recommendations('The Ring')`: similitud, género y puntuación ponderada.
+- `hybrid(100, 'Gattaca')`: recomendaciones para un usuario del dataset, excluyendo sus películas valoradas.
+
+Las tres últimas funciones también aceptan el ID numérico de TMDB en lugar del título. Si un título identifica varias películas, se muestran los ID para elegir. Un usuario desconocido recibe un mensaje explícito; utiliza la recomendación por contenido cuando no hay historial.
+
+## Evaluación y límites
+
+Se reserva un 20 % de valoraciones para evaluación. La selección de parámetros usa solo el 80 % restante y se compara SVD con BaselineOnly sobre el mismo test. Después se entrena un modelo final con todas las valoraciones para recomendar. La muestra, las particiones y SVD utilizan una semilla fija.
+
+RMSE y MAE evalúan predicciones de notas, no la calidad del ranking híbrido. Queda pendiente evaluar Precision@10/NDCG@10 y cobertura con datos reservados. La división aleatoria tampoco simula necesariamente recomendaciones futuras; para ese objetivo habría que evaluar una división temporal.
+
+Se mantiene el filtro original del percentil 95 de votos: el catálogo favorece películas populares y no incluye todas las películas del dataset. El híbrido reordena hasta 25 candidatas no vistas; las películas sin historial colaborativo pueden recibir estimaciones menos personalizadas. La similitud se almacena en una matriz densa: ampliar mucho el catálogo exigiría revisar su consumo de memoria.
+
+## Comprobaciones sin descargar los datos
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Las pruebas ejecutan las funciones del propio cuaderno con datos sintéticos y cubren sinopsis, deduplicación, índices, títulos ambiguos, precisión de notas y exclusión de películas vistas. El predictor colaborativo se simula: estas pruebas no sustituyen la ejecución completa con Kaggle y Surprise.
+
+El PDF incluido corresponde a la versión original y no se ha regenerado.
+
+## Autor y licencia
+
+Albert Vila. Licencia MIT: [LICENSE.txt](LICENSE.txt).
